@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+node_modules/
+dist/
+.DS_Store
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+backend/chroma_data/
+backend/data.db
+.pytest_cache/
+backend/.env.example
