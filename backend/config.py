@@ -12,9 +12,11 @@ CHUNK_SIZE_CHARS = 2000
 CHUNK_OVERLAP_CHARS = 200
 
 # --- Embeddings ---
-# Runs locally via sentence-transformers — free, no API key, no internet
-# needed after the first download of the model weights.
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+# Runs locally via fastembed (ONNX) — free, no API key, no internet needed
+# after the model weights are downloaded once.
+EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+# Stored inside the project so a build-time download survives into runtime.
+EMBEDDING_CACHE_DIR = os.path.join(os.path.dirname(__file__), "model_cache")
 
 # --- Retrieval ---
 TOP_K_CHUNKS = 4

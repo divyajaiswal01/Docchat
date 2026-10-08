@@ -12,3 +12,4 @@ backend/chroma_data/
 backend/data.db
 .pytest_cache/
 backend/.env.example
+backend/model_cache/

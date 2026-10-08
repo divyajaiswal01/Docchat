@@ -41,7 +41,7 @@
 | Styling           | Tailwind CSS                        | Quick, clean, no custom CSS overhead |
 | Backend           | Python + FastAPI                    | Simple, async, great for AI/ML glue code |
 | PDF parsing       | `pdfplumber`                        | Preserves page numbers for citations |
-| Embeddings        | Sentence-Transformers (local, free) | No paid API needed — runs on CPU |
+| Embeddings        | fastembed / ONNX (local, free)      | Same MiniLM model as sentence-transformers, far less RAM |
 | Vector store      | Chroma (local, file-based)          | Zero-infra setup, good enough for MVP |
 | LLM               | Groq API (Llama 3.3 70B)            | Free tier, no credit card, very fast inference |
 | Database          | SQLite                              | Store doc metadata + chat history, no server needed |

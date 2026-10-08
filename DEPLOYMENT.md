@@ -61,7 +61,7 @@ Render and Vercel both deploy by connecting to a GitHub repo.
    | Name | `docchat-backend` (or anything) |
    | Root Directory | `backend` |
    | Runtime | Python 3 |
-   | Build Command | `pip install -r requirements.txt` |
+   | Build Command | `pip install -r requirements.txt && python -c "from services.embeddings import warm_up; warm_up()"` |
    | Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
    | Instance Type | Free |
 4. Add environment variables (under **Environment**):
@@ -70,8 +70,8 @@ Render and Vercel both deploy by connecting to a GitHub repo.
    | `GROQ_API_KEY` | your real Groq key |
    | `CORS_ORIGINS` | `http://localhost:5173` for now — you'll update this in Step 4 |
    | `PYTHON_VERSION` | `3.11.9` |
-5. **Create Web Service**. First deploy takes a few minutes (installing
-   torch is the slow part). Watch the logs — you're looking for
+5. **Create Web Service**. First deploy takes a few minutes (the build
+   also downloads the ~90MB embedding model so your first upload isn't slow). Watch the logs — you're looking for
    `Uvicorn running on http://0.0.0.0:...` and `Database ready, DocChat
    API starting up.` (that log line is proof Phase 4's logging is working
    in production, not just locally)
@@ -80,10 +80,12 @@ Render and Vercel both deploy by connecting to a GitHub repo.
 7. Sanity check it: open `https://YOUR-BACKEND-URL/health` in a browser —
    you should see `{"status":"ok"}`
 
-**If the deploy fails with an out-of-memory error:** the free tier's
-512MB RAM is genuinely tight for `sentence-transformers` + `torch`. If
-this happens, it's worth knowing as a real tradeoff, not a dead end — see
-the "If Render's free tier can't fit it" section at the bottom.
+**If the app crashes with an out-of-memory error:** the free tier's 512MB
+RAM is tight. This project originally used `sentence-transformers` +
+`torch`, which exceeded it (symptom: uploads fail with a confusing CORS
+error in the browser, plus a "exceeded its memory limit" email from
+Render). It now uses `fastembed` (ONNX) instead — same model, far less
+RAM. See the section at the bottom if you still hit limits.
 
 ---
 
@@ -151,15 +153,24 @@ the "before you start" note above — not a bug.
 
 ## If Render's free tier can't fit it
 
-If the backend deploy OOMs, you have a few honest options, roughly in
-order of effort:
-1. **Try again** — Render's free tier memory can be inconsistent; a retry
-   sometimes succeeds
-2. **Upgrade the Render instance** one tier (small monthly cost) —
-   reasonable if you want this link to be reliably demoable
-3. **Swap `sentence-transformers` for an even smaller embedding model** —
-   more engineering effort, but keeps everything free
+What actually happened on this project's first deploy: uploads failed in the
+browser with a CORS error. The real cause was Render's logs saying the
+service ran out of memory and restarted mid-request; the error response
+that came back had no CORS headers, so the browser reported it as CORS.
+Lesson: **a CORS error can be a symptom of a crashed backend** — check the
+server logs before touching CORS settings.
+
+Options if you hit the memory limit again, roughly in order of effort:
+1. **Use a lighter embedding runtime** — already done here (`fastembed`
+   instead of `torch`). Free, no behavior change.
+2. **Pay for more RAM** — note Render's **Starter ($7/mo) has the same
+   512MB as Free**; only **Standard ($25/mo, 2GB)** adds memory.
+3. **Host the backend somewhere with more free RAM** — check current
+   free-tier limits first.
 4. **Explain the tradeoff instead of fighting it** — "I hit a real
-   resource constraint on free hosting and here's how I'd solve it in
-   production" is a legitimate, honest answer in an interview. Not every
-   constraint needs to be engineered around to prove you understand it.
+   resource constraint on free hosting, diagnosed it from the logs, and
+   here's how I'd solve it in production" is a legitimate, strong answer
+   in an interview.
+
+Also remember: free-tier disk is ephemeral, so uploaded documents vanish
+on every restart/redeploy (see the top of this file).
