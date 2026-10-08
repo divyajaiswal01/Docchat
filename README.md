@@ -1,4 +1,8 @@
 # DocChat
+**Live demo:** https://docchat-virid.vercel.app
+
+*(Hosted on free tiers. If it's been idle, the first request can take about a minute while the backend wakes up. Uploaded documents don't persist across restarts.)*
+
 
 Upload a PDF, ask it questions, get answers grounded in the document text —
 streamed in as they're generated, with a page citation underneath, backed
