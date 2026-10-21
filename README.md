@@ -184,6 +184,3 @@ docchat/
             ├── ChatWindow.jsx      # streaming, citations, usage display
             └── MessageBubble.jsx
 ```
-
-
-clarify project setup instructions
